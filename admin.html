@@ -285,6 +285,29 @@ const markSent=ids=>lsSet('ml_sent',[...new Set([...sentGet(),...ids.map(String)
 const waLink=a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'tu servicio'},tipo=s.cat==='mas'?'tu masaje':s.cat?'depi':'tu turno';
   const t=lsGet('ml_tpl',TPL_DEF).replace(/\{nombre\}/g,a.name).replace(/\{servicio\}/g,s.name).replace(/\{dia\}/g,longDate(a.date)).replace(/\{hora\}/g,a.time).replace(/\{duracion\}/g,a.dur).replace(/\{tipo\}/g,tipo).replace(/\{alias\}/g,lsGet('ml_alias','[TU ALIAS]'));
   return 'https://wa.me/54'+a.phone.replace(/\D/g,'').replace(/^0|^54|^9/,'')+'?text='+encodeURIComponent(t)};
+// ===== NOTIFICACIONES PUSH =====
+const VAPID='BIapeffkZ-WtYWGaCiYMDYZwG_ioWPGFXJ_pvi_c85YtnZuKKH26y4InAiRNW7UCKwg7hcbkHL8rM0obwfOh-Ck';
+const b64u=s=>Uint8Array.from(atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+async function enablePush(){
+  try{
+    if(await Notification.requestPermission()!=='granted'){alert('Para recibir avisos tenés que permitir las notificaciones.');return}
+    const reg=await navigator.serviceWorker.register('sw-admin.js',{scope:location.pathname});
+    const w=reg.installing||reg.waiting||reg.active;
+    if(w.state!=='activated')await new Promise(r=>w.addEventListener('statechange',()=>w.state==='activated'&&r()));
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)});
+    const {error}=await db.rpc('admin_guardar_push',{p_pin:PIN,p_sub:sub.toJSON()});
+    if(error){alert('No se pudo activar: '+error.message);return}
+    lsSet('ml_push',true);toast('Avisos activados ✓');renderA();
+  }catch(e){alert('No se pudo activar los avisos: '+e.message)}
+}
+async function disablePush(){
+  try{const reg=await navigator.serviceWorker.getRegistration(),sub=reg&&await reg.pushManager.getSubscription();
+    if(sub){await db.rpc('admin_quitar_push',{p_pin:PIN,p_endpoint:sub.endpoint});await sub.unsubscribe()}}catch(e){}
+  lsSet('ml_push',false);renderA();
+}
+const pushCard=()=>!('PushManager'in window)?`<div class="card muted">Este navegador no admite notificaciones. En iPhone, agregá el panel a la pantalla de inicio y abrilo desde ahí.</div>`
+ :(lsGet('ml_push',false)&&Notification.permission==='granted')?`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>🔔 Avisos de turnos <b>activados</b> en este dispositivo</span><button class="link" id="pxoff" style="color:var(--muted)">Desactivar</button></div>`
+ :`<div class="card"><h2>Avisos en el celular</h2><p class="muted" style="margin-bottom:10px">Recibí una notificación apenas alguien saca turno, aunque tengas el panel cerrado.</p><button class="cta" id="pxon">🔔 Activar avisos</button></div>`;
 async function loadPend(){
   const ds=[];for(let i=0;i<15;i++)ds.push(ymd(new Date(Date.now()+i*864e5)));
   const r=await Promise.all(ds.map(d=>db.rpc('admin_turnos',{p_pin:PIN,p_fecha:d})));
@@ -307,7 +330,7 @@ function renderA(){
   let h=`<div class="tabs">${tab('nuevos','Nuevos')}${tab('agenda','Agenda')}${tab('serv','Servicios')}${tab('aviso','Mensaje')}${tab('equipo','Equipo')}</div>`;
   if(adminTab==='nuevos'){
     const l=nuevos();
-    h+=`<div class="card"><h2>Turnos para avisar</h2><p class="muted" style="margin-bottom:8px">Turnos de los próximos 15 días a los que todavía no les mandaste el mensaje. Tocá “Enviar mensaje” y se abre WhatsApp con el texto listo.</p>`;
+    h+=pushCard()+`<div class="card"><h2>Turnos para avisar</h2><p class="muted" style="margin-bottom:8px">Turnos de los próximos 15 días a los que todavía no les mandaste el mensaje. Tocá “Enviar mensaje” y se abre WhatsApp con el texto listo.</p>`;
     if(!l.length)h+=`<p class="muted" style="padding:14px 0">Todo al día ✓</p>`;
     l.forEach(a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'Servicio'},w=S.workers.find(x=>x.id===a.wid);
       h+=`<div class="turno" style="display:block"><div><b>${esc(a.name)}</b> · <span class="muted">${esc(a.phone)}</span></div><div class="muted" style="margin:2px 0 10px">${esc(s.name)} · ${longDate(a.date)} · ${a.time} hs${w?' · '+esc(w.name):''}</div>
@@ -355,6 +378,7 @@ function renderA(){
   const al=$('#allok');if(al)al.onclick=()=>{markSent(nuevos().map(a=>a.id));renderA()};
   const tps=$('#tps');if(tps)tps.onclick=()=>{lsSet('ml_tpl',$('#tpl').value.trim()||TPL_DEF);lsSet('ml_alias',$('#alias').value.trim()||'[TU ALIAS]');toast('Texto guardado ✓')};
   badge();
+  const pn=$('#pxon');if(pn)pn.onclick=enablePush;const pf=$('#pxoff');if(pf)pf.onclick=disablePush;
   const avs=$('#avs');if(avs)avs.onclick=async()=>{
     const v={texto:$('#avt').value.trim().slice(0,300),activo:$('#ava').checked};avs.disabled=true;
     const {error}=await db.rpc('admin_guardar_aviso',{p_pin:PIN,p_texto:v.texto,p_activo:v.activo});
