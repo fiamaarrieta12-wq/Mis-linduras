@@ -46,7 +46,7 @@ h2{font:500 30px/1.1 var(--serif);letter-spacing:-.005em;margin-bottom:16px}
 .chip small{display:block;font:italic 13px var(--serif);color:var(--muted)}
 .chip.sel{background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:var(--gold);color:#fff}
 .chip.sel small{color:#fff;opacity:.9}
-input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;font-size:16px}
+input,select,textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;font-size:16px}
 input:focus{border-color:var(--gold);outline:0;box-shadow:0 0 0 3px rgba(203,162,75,.2)}
 input::placeholder{color:#b3a794}
 input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--gold);padding:0}
@@ -78,6 +78,14 @@ input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--gold);pa
 .savebar span{display:block;text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:6px}
 #toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translate(-50%,-90px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:99px;font-size:14px;transition:transform .35s;z-index:9}
 #toast.show{transform:translate(-50%,0)}
+textarea{resize:vertical;font-family:inherit;line-height:1.4}
+.chk{display:flex;gap:10px;align-items:center;margin:4px 0 12px;font-size:14.5px}
+.pin{background:var(--soft);border:1px solid var(--gold2);border-radius:22px;padding:20px 20px 16px;margin-bottom:16px}
+.pin .tag{font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.pin p{font:500 22px/1.3 var(--serif);white-space:pre-line;margin-bottom:14px}
+.pin .rr{display:flex;gap:8px}.pin .rr input{margin:0;flex:1;min-width:0}
+.pin .rr button{border:0;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;border-radius:12px;padding:0 16px;font-weight:600;font-size:14px;cursor:pointer}
+.wa-fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:#1f9d55;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:4}
 a{color:inherit}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -112,6 +120,7 @@ const DEF=[
  ['m4','Drenaje linfático','mas',null,60],['m5','Bambuterapia','mas',null,60],['m6','Gemoterapia (piedras calientes)','mas',null,60]
 ].map(([id,name,cat,price,dur],i)=>({id,name,cat,price,dur,on:true}));
 let SERV=lsGet('ml_serv',DEF);
+let AV=lsGet('ml_aviso',{texto:'',activo:false});   // mensaje fijado
 
 // ===== CONEXIÓN SUPABASE =====
 document.head.appendChild(Object.assign(document.createElement('link'),{rel:'preconnect',href:SUPABASE_URL}));
@@ -142,6 +151,7 @@ async function demoRpc(n,a){
   if(n==='admin_cancelar'){lsSet('ml_demo_appts',T.filter(x=>x.id!==a.p_id));return ok(null)}
   if(n==='admin_guardar_prof'){lsSet('ml_demo_workers',a.p.map(w=>({id:w.id,name:w.name,days:w.days,from:w.desde,to:w.hasta,cats:w.cats})));return ok(null)}
   if(n==='admin_guardar_serv'){lsSet('ml_demo_serv',a.p);return ok(null)}
+  if(n==='admin_guardar_aviso'){lsSet('ml_demo_aviso',{texto:a.p_texto,activo:a.p_activo});return ok(null)}
   if(n==='admin_set_pin'){lsSet('ml_demo_pin',a.p_new);return ok(null)}
   return ok(null);
 }
@@ -154,15 +164,20 @@ async function loadServ(){
   const {data}=await req('/rest/v1/servicios?select=*&order=orden');
   if(data&&data.length){SERV=data.map(mapServ);lsSet('ml_serv',SERV)}   // si la tabla aún no existe, quedan los servicios por defecto
 }
+async function loadAviso(){
+  if(NOCFG){AV=lsGet('ml_demo_aviso',AV);return}
+  const {data}=await req('/rest/v1/ajustes?select=valor&clave=eq.aviso');
+  if(data&&data[0]&&data[0].valor){AV={texto:data[0].valor.texto||'',activo:!!data[0].valor.activo};lsSet('ml_aviso',AV)}
+}
 async function loadPublic(){
   if(NOCFG){
-    S.workers=lsGet('ml_demo_workers',DEMO_WORKERS);await loadServ();
+    S.workers=lsGet('ml_demo_workers',DEMO_WORKERS);await loadServ();await loadAviso();
     const {data:o}=await db.rpc('ocupados',{});
     S.appts=(o||[]).map(a=>({wid:a.wid,date:a.fecha,time:a.hora,dur:a.dur}));
     $('#sub').textContent='Modo demostración';return true;
   }
   const d0=ymd(new Date()),d1=ymd(new Date(Date.now()+15*864e5));
-  const [{data:p,error},{data:o}]=await Promise.all([req('/rest/v1/profesionales?select=*&order=created_at'),db.rpc('ocupados',{p_from:d0,p_to:d1}),loadServ()]);
+  const [{data:p,error},{data:o}]=await Promise.all([req('/rest/v1/profesionales?select=*&order=created_at'),db.rpc('ocupados',{p_from:d0,p_to:d1}),loadServ(),loadAviso()]);
   if(error){if(window.MODE!=='admin'&&!S.workers.length)showErr();return false}
   S.workers=p.map(w=>({id:w.id,name:w.name,days:w.days,from:w.desde,to:w.hasta,cats:w.cats}));
   S.appts=(o||[]).map(a=>({wid:a.wid,date:a.fecha,time:a.hora,dur:a.dur}));
@@ -209,19 +224,20 @@ function pick(sv,ws,date,time){
 
 // ===== CLIENTA =====
 let B={sid:null,wid:'any',date:null,time:null,done:null};
+const waMsg=(a,s,w)=>`Hola Mis Linduras! Reservé turno: ${s.name}, ${longDate(a.date)} a las ${a.time} con ${w.name}. A nombre de ${a.name}.`+(a.reply?` Sobre tu mensaje fijado («${AV.texto.trim()}»): ${a.reply}`:'');
 function renderC(){
   $('#app').className='c';
   const sv=SERV.find(s=>s.id===B.sid&&s.on),ws=sv?S.workers.filter(w=>capable(w,sv)):[];
   if(B.done){
     const a=B.done,s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);
-    const msg=`Hola Mis Linduras! Reservé turno: ${s.name}, ${longDate(a.date)} a las ${a.time} con ${w.name}. A nombre de ${a.name}.`;
+    const msg=waMsg(a,s,w);
     $('#app').innerHTML=`<div class="step ok"><h2>¡Turno confirmado!</h2><div class="sum">${esc(s.name)}<br>${longDate(a.date)} · <b>${a.time} hs</b><br>Te atiende: <b>${esc(w.name)}</b><br>Duración aprox.: ${a.dur} min</div>
-    <a href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"><button class="cta">Avisar por WhatsApp</button></a>
+    <p class="muted">Último paso: enviá el aviso por WhatsApp. Se abre solo; si no, tocá el botón.</p><a href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"><button class="cta">Enviar aviso por WhatsApp</button></a>
     <p class="muted" style="margin:14px 0">Si necesitás cambiarlo, escribinos al 11 3150-8390.</p>
     <button class="ghost" id="again">Sacar otro turno</button></div>`;
     $('#again').onclick=()=>{B={sid:null,wid:'any',date:null,time:null,done:null};renderC()};return;
   }
-  let h=`<section class="step"><h2>¿Qué servicio querés?</h2>`;
+  let h=(AV.activo&&AV.texto.trim()?`<div class="pin"><div class="tag">📌 Mensaje fijado</div><p>${esc(AV.texto)}</p><div class="rr"><input id="rp" placeholder="Escribí tu respuesta…" aria-label="Tu respuesta"><button id="rpb">Responder</button></div></div>`:'')+`<section class="step"><h2>¿Qué servicio querés?</h2>`;
   for(const c in CATS){const l=SERV.filter(s=>s.cat===c&&s.on);if(!l.length)continue;
     h+=`<div class="grp">${CATS[c]}</div>`+l.map(s=>`<button class="opt ${B.sid===s.id?'sel':''}" data-s="${s.id}"><span>${esc(s.name)}<small>${s.dur} min</small></span><b class="${s.price==null?'q':''}">${money(s.price)}</b></button>`).join('')}
   h+=`</section><section class="step ${sv?'':'off'}"><h2>¿Con quién?</h2><div class="chips"><button class="chip ${B.wid==='any'?'sel':''}" data-w="any">Cualquiera<small>El primer horario libre</small></button>`;
@@ -237,9 +253,10 @@ function renderC(){
     if(B.time){const w=S.workers.find(x=>x.id===pick(sv,ws,B.date,B.time));if(w)h+=`<p class="muted" style="margin-top:12px">Te va a atender <b>${esc(w.name)}</b>.</p>`}}
   h+=`</section><section class="step ${B.time?'':'off'}"><h2>Tus datos</h2><input id="nm" placeholder="Nombre y apellido" autocomplete="name"><input id="ph" placeholder="WhatsApp (ej. 11 5555 1234)" inputmode="tel" autocomplete="tel">
   <button class="cta" id="ok">Confirmar turno</button><p class="muted" id="err" style="color:var(--bad);margin-top:8px"></p></section>`;
-  const keep={n:$('#nm')?.value,p:$('#ph')?.value};
+  const keep={n:$('#nm')?.value,p:$('#ph')?.value,r:$('#rp')?.value};
   $('#app').innerHTML=h;
-  if(keep.n)$('#nm').value=keep.n;if(keep.p)$('#ph').value=keep.p;
+  if(keep.n)$('#nm').value=keep.n;if(keep.p)$('#ph').value=keep.p;if(keep.r&&$('#rp'))$('#rp').value=keep.r;
+  const rb=$('#rpb');if(rb)rb.onclick=()=>{const r=$('#rp').value.trim();if(!r){$('#rp').focus();return}window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Te respondo a tu mensaje fijado («'+AV.texto.trim()+'»): '+r),'_blank','noopener')};
   q('[data-s]',b=>b.onclick=()=>{B.sid=b.dataset.s;B.wid='any';B.date=null;B.time=null;renderC();window.scrollBy({top:200,behavior:'smooth'})});
   q('[data-w]',b=>b.onclick=()=>{B.wid=b.dataset.w;B.date=null;B.time=null;renderC()});
   q('[data-d]',b=>b.onclick=()=>{B.date=b.dataset.d;B.time=null;renderC()});
@@ -249,10 +266,11 @@ function renderC(){
     if(name.length<2||phone.replace(/\D/g,'').length<8){$('#err').textContent='Completá tu nombre y un WhatsApp válido.';return}
     const wid=pick(sv,ws,B.date,B.time);
     if(!wid||!slots(S.workers.find(w=>w.id===wid),B.date,sv.dur).includes(B.time)){B.time=null;renderC();return}
-    const a={wid,sid:sv.id,date:B.date,time:B.time,dur:sv.dur,name,phone};ok.disabled=true;
+    const a={wid,sid:sv.id,date:B.date,time:B.time,dur:sv.dur,name,phone};a.reply=($('#rp')?.value||'').trim();ok.disabled=true;const win=window.open('','_blank');   // se abre ya, para que el navegador no lo bloquee
     const {error}=await db.rpc('crear_turno',{p_wid:wid,p_sid:sv.id,p_fecha:a.date,p_hora:a.time,p_dur:a.dur,p_nombre:name,p_tel:phone});
-    if(error){await loadPublic();B.time=null;renderC();$('#err').textContent='Ese horario se acaba de ocupar. Elegí otro.';return}
+    if(error){if(win)win.close();await loadPublic();B.time=null;renderC();$('#err').textContent='Ese horario se acaba de ocupar. Elegí otro.';return}
     S.appts.push(a);B.done=a;renderC();window.scrollTo(0,0);
+    if(win){const s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);win.location.href='https://wa.me/'+WA+'?text='+encodeURIComponent(waMsg(a,s,w))}
   };
 }
 
@@ -266,7 +284,7 @@ function renderA(){
     return;
   }
   const tab=(k,l)=>`<button class="${adminTab===k?'sel':''}" data-tab="${k}">${l}</button>`;
-  let h=`<div class="tabs">${tab('agenda','Agenda')}${tab('serv','Servicios')}${tab('equipo','Equipo')}</div>`;
+  let h=`<div class="tabs">${tab('agenda','Agenda')}${tab('serv','Servicios')}${tab('aviso','Mensaje')}${tab('equipo','Equipo')}</div>`;
   if(adminTab==='agenda'){
     h+=`<div class="card"><input type="date" id="ad" value="${adminDate}"><h2>Turnos del día</h2>`;
     S.workers.forEach(w=>{
@@ -287,6 +305,8 @@ function renderA(){
         <div class="svc-act"><label><input type="checkbox" data-so="${i}" ${s.on?'checked':''}>Visible</label><button class="link" data-sx="${i}">Eliminar</button></div></div>`});
       h+=`<button class="ghost add" data-sa="${c}">+ Agregar servicio</button>`}
     h+=`</div><div style="height:96px"></div><div class="savebar ${dirty?'show':''}" id="sb"><div><span>Hay cambios sin guardar</span><button class="cta" id="sv">Guardar cambios</button></div></div>`;
+  }else if(adminTab==='aviso'){
+    h+=`<div class="card"><h2>Mensaje fijado</h2><p class="muted" style="margin-bottom:12px">Aparece arriba en la página de turnos. Las clientas pueden responderlo y la respuesta te llega por WhatsApp.</p><textarea id="avt" rows="4" maxlength="300" placeholder="Ej: Promo de octubre: 20% off en rostro completo. ¿Querés reservar?">${esc(AV.texto)}</textarea><label class="chk"><input type="checkbox" id="ava" ${AV.activo?'checked':''}>Mostrar mensaje fijado</label><button class="cta" id="avs">Guardar mensaje</button></div>`;
   }else{
     h+=`<div class="card"><h2>Profesionales</h2>`;
     S.workers.forEach((w,i)=>{
@@ -300,6 +320,11 @@ function renderA(){
   }
   $('#app').innerHTML=h;
   q('[data-tab]',b=>b.onclick=()=>{adminTab=b.dataset.tab;renderA()});
+  const avs=$('#avs');if(avs)avs.onclick=async()=>{
+    const v={texto:$('#avt').value.trim().slice(0,300),activo:$('#ava').checked};avs.disabled=true;
+    const {error}=await db.rpc('admin_guardar_aviso',{p_pin:PIN,p_texto:v.texto,p_activo:v.activo});
+    avs.disabled=false;if(error){alert('No se pudo guardar: '+error.message);return}
+    AV=v;lsSet('ml_aviso',AV);toast('Mensaje guardado ✓')};
   const ad=$('#ad');if(ad)ad.onchange=async()=>{adminDate=ad.value||adminDate;await loadAdmin();renderA()};
   q('[data-x]',b=>b.onclick=async()=>{if(confirm('¿Cancelar este turno?')){await db.rpc('admin_cancelar',{p_pin:PIN,p_id:b.dataset.x});await loadAdmin();await loadPublic();renderA()}});
   // servicios
@@ -338,6 +363,7 @@ else{
   else $('#app').innerHTML='<p class="muted" style="text-align:center;padding:30px">Cargando…</p>';
   loadPublic().then(ok=>{if(ok&&!B.done)go('c')});
 }
+if(window.MODE!=='admin')document.body.insertAdjacentHTML('beforeend',`<a class="wa-fab" href="https://wa.me/${WA}?text=${encodeURIComponent('Hola Mis Linduras! Quería hacer una consulta.')}" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.5.7.7-2.4-.2-.4A8 8 0 0 1 12 4zm-3 3.5c-.3 0-.7.2-1 .6-.4.5-.9 1.3-.4 2.6.6 1.6 2.2 3.6 4.4 4.7 1.5.7 2.3.7 3 .5.7-.2 1.3-.9 1.5-1.5.1-.4.1-.7 0-.8l-1.9-.9c-.3-.1-.5 0-.7.2l-.7.9c-.1.1-.3.2-.5.1-.9-.4-2.1-1.3-2.8-2.5-.1-.2 0-.3.1-.5l.5-.6c.1-.2.2-.4.1-.6l-.8-1.8c-.1-.3-.3-.3-.5-.3z"/></svg></a>`);
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{}));
 </script>
 </body>
