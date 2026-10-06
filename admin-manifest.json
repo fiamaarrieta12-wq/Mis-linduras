@@ -3,11 +3,11 @@
   "short_name": "Linduras Equipo",
   "description": "Panel del equipo de Mis Linduras.",
   "lang": "es-AR",
-  "start_url": "admin.html",
+  "start_url": "admin",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#fbf3ea",
-  "theme_color": "#9a4a28",
+  "background_color": "#f6f1ea",
+  "theme_color": "#f6f1ea",
   "icons": [
     {
       "src": "icons/icon-192.png",
