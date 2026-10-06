@@ -62,7 +62,7 @@ input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--gold);pa
 .row{display:flex;gap:10px}.row>*{flex:1}
 .days{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
 .tabs{display:flex;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:4px;margin-bottom:16px}
-.tabs button{flex:1;border:0;background:none;padding:10px 4px;border-radius:99px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted)}
+.tabs button{flex:1;border:0;background:none;padding:10px 2px;border-radius:99px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted)}
 .tabs button.sel{background:#fff;color:var(--gold);box-shadow:0 2px 8px -3px rgba(120,86,20,.4)}
 .svc{border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;background:#fff}
 .svc.inactive{background:#f6f3ec;opacity:.75}
@@ -226,14 +226,15 @@ function pick(sv,ws,date,time){
 // ===== CLIENTA =====
 let B={sid:null,wid:'any',date:null,time:null,done:null};
 const waMsg=(a,s,w)=>`Hola Mis Linduras! Reservé turno: ${s.name}, ${longDate(a.date)} a las ${a.time} con ${w.name}. A nombre de ${a.name}.`+(a.reply?` Sobre tu mensaje fijado («${AV.texto.trim()}»): ${a.reply}`:'');
+const turnoTxt=()=>{const l=lsGet('ml_last',null);return l&&l.date>=ymd(new Date())?` Mi turno: ${l.s}, ${longDate(l.date)} a las ${l.time} con ${l.w}.`:''};
 function renderC(){
   $('#app').className='c';
   const sv=SERV.find(s=>s.id===B.sid&&s.on),ws=sv?S.workers.filter(w=>capable(w,sv)):[];
   if(B.done){
     const a=B.done,s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);
     const msg=waMsg(a,s,w);
-    $('#app').innerHTML=`<div class="step ok"><h2>¡Turno confirmado!</h2><div class="sum">${esc(s.name)}<br>${longDate(a.date)} · <b>${a.time} hs</b><br>Te atiende: <b>${esc(w.name)}</b><br>Duración aprox.: ${a.dur} min</div>
-    <p class="muted">Último paso: enviá el aviso por WhatsApp. Se abre solo; si no, tocá el botón.</p><a href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"><button class="cta">Enviar aviso por WhatsApp</button></a>
+    $('#app').innerHTML=`<div class="step ok"><h2>¡Turno reservado!</h2><div class="sum">${esc(s.name)}<br>${longDate(a.date)} · <b>${a.time} hs</b><br>Te atiende: <b>${esc(w.name)}</b><br>Duración aprox.: ${a.dur} min</div>
+    <p>Te vamos a escribir por WhatsApp al <b>${esc(a.phone)}</b> para confirmarte el turno.</p><a class="ghost" style="margin-top:12px" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Escribinos nosotras primero (opcional)</a>
     <p class="muted" style="margin:14px 0">Si necesitás cambiarlo, escribinos al 11 3150-8390.</p>
     <button class="ghost" id="again">Sacar otro turno</button></div>`;
     $('#again').onclick=()=>{B={sid:null,wid:'any',date:null,time:null,done:null};renderC()};return;
@@ -252,12 +253,12 @@ function renderC(){
   h+=`</div>`;
   if(sv&&B.date){h+=`<div class="grp">Horarios libres</div><div class="chips">`+avail(sv,ws,B.date).map(t=>`<button class="chip ${B.time===t?'sel':''}" data-t="${t}">${t}</button>`).join('')+`</div>`;
     if(B.time){const w=S.workers.find(x=>x.id===pick(sv,ws,B.date,B.time));if(w)h+=`<p class="muted" style="margin-top:12px">Te va a atender <b>${esc(w.name)}</b>.</p>`}}
-  h+=`</section><section class="step ${B.time?'':'off'}"><h2>Tus datos</h2><input id="nm" placeholder="Nombre y apellido" autocomplete="name"><input id="ph" placeholder="WhatsApp (ej. 11 5555 1234)" inputmode="tel" autocomplete="tel">
+  h+=`</section><section class="step ${B.time?'':'off'}"><h2>Tus datos</h2><input id="nm" placeholder="Nombre y apellido" autocomplete="name"><input id="ph" placeholder="Tu WhatsApp (ej. 11 5555 1234)" inputmode="tel" autocomplete="tel">
   <button class="cta" id="ok">Confirmar turno</button><p class="muted" id="err" style="color:var(--bad);margin-top:8px"></p></section>`;
   const keep={n:$('#nm')?.value,p:$('#ph')?.value,r:$('#rp')?.value};
   $('#app').innerHTML=h;
   if(keep.n)$('#nm').value=keep.n;if(keep.p)$('#ph').value=keep.p;if(keep.r&&$('#rp'))$('#rp').value=keep.r;
-  const rb=$('#rpb');if(rb)rb.onclick=()=>{const r=$('#rp').value.trim();if(!r){$('#rp').focus();return}window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Te respondo a tu mensaje fijado («'+AV.texto.trim()+'»): '+r),'_blank','noopener')};
+  const rb=$('#rpb');if(rb)rb.onclick=()=>{const r=$('#rp').value.trim();if(!r){$('#rp').focus();return}window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Te respondo a tu mensaje fijado («'+AV.texto.trim()+'»): '+r+turnoTxt()),'_blank','noopener')};
   q('[data-s]',b=>b.onclick=()=>{B.sid=b.dataset.s;B.wid='any';B.date=null;B.time=null;renderC();window.scrollBy({top:200,behavior:'smooth'})});
   q('[data-w]',b=>b.onclick=()=>{B.wid=b.dataset.w;B.date=null;B.time=null;renderC()});
   q('[data-d]',b=>b.onclick=()=>{B.date=b.dataset.d;B.time=null;renderC()});
@@ -267,33 +268,60 @@ function renderC(){
     if(name.length<2||phone.replace(/\D/g,'').length<8){$('#err').textContent='Completá tu nombre y un WhatsApp válido.';return}
     const wid=pick(sv,ws,B.date,B.time);
     if(!wid||!slots(S.workers.find(w=>w.id===wid),B.date,sv.dur).includes(B.time)){B.time=null;renderC();return}
-    const a={wid,sid:sv.id,date:B.date,time:B.time,dur:sv.dur,name,phone};a.reply=($('#rp')?.value||'').trim();ok.disabled=true;const win=window.open('','_blank');   // se abre ya, para que el navegador no lo bloquee
+    const a={wid,sid:sv.id,date:B.date,time:B.time,dur:sv.dur,name,phone};a.reply=($('#rp')?.value||'').trim();ok.disabled=true;
     const {error}=await db.rpc('crear_turno',{p_wid:wid,p_sid:sv.id,p_fecha:a.date,p_hora:a.time,p_dur:a.dur,p_nombre:name,p_tel:phone});
-    if(error){if(win)win.close();await loadPublic();B.time=null;renderC();$('#err').textContent='Ese horario se acaba de ocupar. Elegí otro.';return}
+    if(error){await loadPublic();B.time=null;renderC();$('#err').textContent='Ese horario se acaba de ocupar. Elegí otro.';return}
     S.appts.push(a);B.done=a;renderC();window.scrollTo(0,0);
-    if(win){const s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);win.location.href='https://wa.me/'+WA+'?text='+encodeURIComponent(waMsg(a,s,w))}
+    {const s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);lsSet('ml_last',{date:a.date,time:a.time,s:s.name,w:w.name})}
   };
 }
 
 // ===== ADMIN =====
-let unlocked=false,adminDate=ymd(new Date()),adminTab='agenda',dirty=false;
+let unlocked=false,adminDate=ymd(new Date()),adminTab='nuevos',dirty=false;
+const TPL_DEF='Hola bella! 💛\nTe espero {dia} a las {hora}hs para {tipo} en Mis Linduras.\n\nAlias seña: {alias}\nTrae toallita de mano porfi 🙏\n\n¿Me confirmás por acá? ✨';
+let PEND=[],SEEN=null;
+const sentGet=()=>lsGet('ml_sent',[]).map(String);
+const markSent=ids=>lsSet('ml_sent',[...new Set([...sentGet(),...ids.map(String)])]);
+const waLink=a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'tu servicio'},tipo=s.cat==='mas'?'tu masaje':s.cat?'depi':'tu turno';
+  const t=lsGet('ml_tpl',TPL_DEF).replace(/\{nombre\}/g,a.name).replace(/\{servicio\}/g,s.name).replace(/\{dia\}/g,longDate(a.date)).replace(/\{hora\}/g,a.time).replace(/\{duracion\}/g,a.dur).replace(/\{tipo\}/g,tipo).replace(/\{alias\}/g,lsGet('ml_alias','[TU ALIAS]'));
+  return 'https://wa.me/54'+a.phone.replace(/\D/g,'').replace(/^0|^54|^9/,'')+'?text='+encodeURIComponent(t)};
+async function loadPend(){
+  const ds=[];for(let i=0;i<15;i++)ds.push(ymd(new Date(Date.now()+i*864e5)));
+  const r=await Promise.all(ds.map(d=>db.rpc('admin_turnos',{p_pin:PIN,p_fecha:d})));
+  PEND=r.flatMap(x=>(x.data||[]).map(a=>({id:a.id,wid:a.wid,sid:a.sid,date:a.fecha,time:a.hora,dur:a.dur,name:a.nombre,phone:a.telefono}))).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+}
+const nuevos=()=>PEND.filter(a=>!sentGet().includes(String(a.id)));
+function badge(){const n=nuevos().length;document.title=(n?'('+n+') ':'')+'Mis Linduras · Equipo';const b=$('[data-tab=nuevos]');if(b)b.textContent='Nuevos'+(n?' ('+n+')':'')}
+// revisa turnos nuevos cada 30 s mientras el panel está abierto
+setInterval(async()=>{if(!unlocked)return;await Promise.all([loadPend(),loadAdmin()]);
+  const ids=PEND.map(a=>String(a.id));if(SEEN&&ids.some(i=>!SEEN.includes(i)))toast('🔔 Turno nuevo');SEEN=ids;
+  if(['nuevos','agenda'].includes(adminTab)&&!document.activeElement?.matches('input,textarea'))renderA();else badge()},30000);
 function renderA(){
   $('#app').className='';
   if(!unlocked){
     $('#app').innerHTML=`<div class="card"><h2>Acceso del equipo</h2><input id="pin" type="password" inputmode="numeric" placeholder="PIN"><button class="cta" id="go">Entrar</button><p class="muted" id="err" style="color:var(--bad);margin-top:8px"></p></div>`;
-    $('#go').onclick=async()=>{const p=$('#pin').value,{data}=await db.rpc('chk_pin',{p_pin:p});if(data===true){PIN=p;unlocked=true;await Promise.all([PUB,loadAdmin()]);renderA()}else $('#err').textContent='PIN incorrecto.'};
+    $('#go').onclick=async()=>{const p=$('#pin').value,{data}=await db.rpc('chk_pin',{p_pin:p});if(data===true){PIN=p;unlocked=true;await Promise.all([PUB,loadAdmin(),loadPend()]);SEEN=PEND.map(a=>String(a.id));renderA()}else $('#err').textContent='PIN incorrecto.'};
     return;
   }
   const tab=(k,l)=>`<button class="${adminTab===k?'sel':''}" data-tab="${k}">${l}</button>`;
-  let h=`<div class="tabs">${tab('agenda','Agenda')}${tab('serv','Servicios')}${tab('aviso','Mensaje')}${tab('equipo','Equipo')}</div>`;
-  if(adminTab==='agenda'){
+  let h=`<div class="tabs">${tab('nuevos','Nuevos')}${tab('agenda','Agenda')}${tab('serv','Servicios')}${tab('aviso','Mensaje')}${tab('equipo','Equipo')}</div>`;
+  if(adminTab==='nuevos'){
+    const l=nuevos();
+    h+=`<div class="card"><h2>Turnos para avisar</h2><p class="muted" style="margin-bottom:8px">Turnos de los próximos 15 días a los que todavía no les mandaste el mensaje. Tocá “Enviar mensaje” y se abre WhatsApp con el texto listo.</p>`;
+    if(!l.length)h+=`<p class="muted" style="padding:14px 0">Todo al día ✓</p>`;
+    l.forEach(a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'Servicio'},w=S.workers.find(x=>x.id===a.wid);
+      h+=`<div class="turno" style="display:block"><div><b>${esc(a.name)}</b> · <span class="muted">${esc(a.phone)}</span></div><div class="muted" style="margin:2px 0 10px">${esc(s.name)} · ${longDate(a.date)} · ${a.time} hs${w?' · '+esc(w.name):''}</div>
+      <div class="row"><a class="ghost" style="text-align:center;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;border-color:var(--gold)" href="${waLink(a)}" target="_blank" rel="noopener" data-sent="${a.id}">Enviar mensaje</a><button class="ghost" data-ok="${a.id}">Ya avisé</button></div></div>`});
+    if(l.length>1)h+=`<button class="link" id="allok" style="margin-top:12px">Marcar todos como avisados</button>`;
+    h+=`</div>`;
+  }else if(adminTab==='agenda'){
     h+=`<div class="card"><input type="date" id="ad" value="${adminDate}"><h2>Turnos del día</h2>`;
     S.workers.forEach(w=>{
       const l=A.filter(a=>a.wid===w.id).sort((a,b)=>a.time.localeCompare(b.time));
       h+=`<div class="grp">${esc(w.name)} · ${l.length} turno${l.length===1?'':'s'}</div>`;
       if(!l.length)h+=`<p class="muted">Sin turnos.</p>`;
-      l.forEach(a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'Servicio eliminado'};h+=`<div class="turno"><span class="hr">${a.time}</span><span style="flex:1">${esc(a.name)}<small class="muted" style="display:block">${esc(s.name)} · ${a.dur} min</small></span>
-        <a href="https://wa.me/54${a.phone.replace(/\D/g,'').replace(/^0|^54|^9/,'')}" target="_blank" rel="noopener" class="ghost">WhatsApp</a><button class="ghost" data-x="${a.id}" aria-label="Cancelar turno">✕</button></div>`});
+      l.forEach(a=>{const s=SERV.find(x=>x.id===a.sid)||{name:'Servicio eliminado'};h+=`<div class="turno"><span class="hr">${a.time}</span><span style="flex:1">${esc(a.name)}${sentGet().includes(String(a.id))?' <small style="color:var(--gold)">✓ avisado</small>':''}<small class="muted" style="display:block">${esc(s.name)} · ${a.dur} min</small></span>
+        <a href="${waLink(a)}" target="_blank" rel="noopener" class="ghost" data-sent="${a.id}">WhatsApp</a><button class="ghost" data-x="${a.id}" aria-label="Cancelar turno">✕</button></div>`});
     });
     h+=`</div>`;
   }else if(adminTab==='serv'){
@@ -307,7 +335,8 @@ function renderA(){
       h+=`<button class="ghost add" data-sa="${c}">+ Agregar servicio</button>`}
     h+=`</div><div style="height:96px"></div><div class="savebar ${dirty?'show':''}" id="sb"><div><span>Hay cambios sin guardar</span><button class="cta" id="sv">Guardar cambios</button></div></div>`;
   }else if(adminTab==='aviso'){
-    h+=`<div class="card"><h2>Mensaje fijado</h2><p class="muted" style="margin-bottom:12px">Aparece arriba en la página de turnos. Las clientas pueden responderlo y la respuesta te llega por WhatsApp.</p><textarea id="avt" rows="4" maxlength="300" placeholder="Ej: Promo de octubre: 20% off en rostro completo. ¿Querés reservar?">${esc(AV.texto)}</textarea><label class="chk"><input type="checkbox" id="ava" ${AV.activo?'checked':''}>Mostrar mensaje fijado</label><button class="cta" id="avs">Guardar mensaje</button></div>`;
+    h+=`<div class="card"><h2>Mensaje fijado</h2><p class="muted" style="margin-bottom:12px">Aparece arriba en la página de turnos. Las clientas pueden responderlo y la respuesta te llega por WhatsApp.</p><textarea id="avt" rows="4" maxlength="300" placeholder="Ej: Promo de octubre: 20% off en rostro completo. ¿Querés reservar?">${esc(AV.texto)}</textarea><label class="chk"><input type="checkbox" id="ava" ${AV.activo?'checked':''}>Mostrar mensaje fijado</label><button class="cta" id="avs">Guardar mensaje</button></div>
+    <div class="card"><h2>Mensaje para clientas</h2><p class="muted" style="margin-bottom:12px">Es el texto que se arma al tocar “Enviar mensaje”. Primero poné tu alias para la seña y después ajustá el texto si querés. Variables: {nombre} {servicio} {tipo} (depi o masaje) {dia} {hora} {duracion} {alias}. Se guarda en este dispositivo.</p><input id="alias" placeholder="Tu alias para la seña" value="${esc(lsGet('ml_alias',''))}"><textarea id="tpl" rows="8">${esc(lsGet('ml_tpl',TPL_DEF))}</textarea><button class="cta" id="tps">Guardar texto</button></div>`;
   }else{
     h+=`<div class="card"><h2>Profesionales</h2>`;
     S.workers.forEach((w,i)=>{
@@ -321,6 +350,11 @@ function renderA(){
   }
   $('#app').innerHTML=h;
   q('[data-tab]',b=>b.onclick=()=>{adminTab=b.dataset.tab;renderA()});
+  q('[data-sent]',a=>a.addEventListener('click',()=>{markSent([a.dataset.sent]);setTimeout(renderA,400)}));
+  q('[data-ok]',b=>b.onclick=()=>{markSent([b.dataset.ok]);renderA()});
+  const al=$('#allok');if(al)al.onclick=()=>{markSent(nuevos().map(a=>a.id));renderA()};
+  const tps=$('#tps');if(tps)tps.onclick=()=>{lsSet('ml_tpl',$('#tpl').value.trim()||TPL_DEF);lsSet('ml_alias',$('#alias').value.trim()||'[TU ALIAS]');toast('Texto guardado ✓')};
+  badge();
   const avs=$('#avs');if(avs)avs.onclick=async()=>{
     const v={texto:$('#avt').value.trim().slice(0,300),activo:$('#ava').checked};avs.disabled=true;
     const {error}=await db.rpc('admin_guardar_aviso',{p_pin:PIN,p_texto:v.texto,p_activo:v.activo});
@@ -365,6 +399,7 @@ else{
   loadPublic().then(ok=>{if(ok&&!B.done)go('c')});
 }
 if(window.MODE!=='admin')document.body.insertAdjacentHTML('beforeend',`<a class="wa-fab" href="https://wa.me/${WA}?text=${encodeURIComponent('Hola Mis Linduras! Quería hacer una consulta.')}" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-2.5.7.7-2.4-.2-.4A8 8 0 0 1 12 4zm-3 3.5c-.3 0-.7.2-1 .6-.4.5-.9 1.3-.4 2.6.6 1.6 2.2 3.6 4.4 4.7 1.5.7 2.3.7 3 .5.7-.2 1.3-.9 1.5-1.5.1-.4.1-.7 0-.8l-1.9-.9c-.3-.1-.5 0-.7.2l-.7.9c-.1.1-.3.2-.5.1-.9-.4-2.1-1.3-2.8-2.5-.1-.2 0-.3.1-.5l.5-.6c.1-.2.2-.4.1-.6l-.8-1.8c-.1-.3-.3-.3-.5-.3z"/></svg></a>`);
+if(window.MODE!=='admin')$('.wa-fab').addEventListener('click',e=>{e.currentTarget.href='https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Quería hacer una consulta.'+turnoTxt())});
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{}));
 </script>
 </body>
