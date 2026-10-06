@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis Linduras · Equipo</title>
+<meta name="description" content="Panel del equipo de Mis Linduras.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#9a4a28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Linduras Equipo">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#fbf3ea;--card:#fffaf4;--ink:#4a2a1c;--muted:#8a6b5a;--accent:#9a4a28;--soft:#f0d9c6;--line:#e8d3c0;--ok:#2d7a4f;--bad:#b3392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1410;--card:#2a1d17;--ink:#f3e3d4;--muted:#c0a08c;--accent:#e2a07e;--soft:#3b2a21;--line:#4a362b}}
+:root[data-theme="dark"]{--bg:#1d1410;--card:#2a1d17;--ink:#f3e3d4;--muted:#c0a08c;--accent:#e2a07e;--soft:#3b2a21;--line:#4a362b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;max-width:560px;margin:0 auto;padding:0 16px 40px}
+h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600}
+header{text-align:center;padding:22px 0 8px}
+header h1{font-size:44px;letter-spacing:.04em;color:var(--accent);line-height:1}
+header p{color:var(--muted);font-size:13px;margin-top:6px}
+nav{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:99px;margin:14px 0}
+nav button{flex:1;border:0;background:none;color:var(--muted);padding:9px;border-radius:99px;font-weight:600;cursor:pointer}
+nav button.on{background:var(--accent);color:var(--bg)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.step.off{opacity:.45;pointer-events:none}
+.step h2{font-size:24px;margin-bottom:10px}
+.grp{font-size:13px;color:var(--muted);margin:12px 0 6px;font-weight:600}
+.opt{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:6px;cursor:pointer;font-size:14px}
+.opt.sel{border-color:var(--accent);background:var(--soft)}
+.opt b{color:var(--accent);white-space:nowrap}
+.opt small{display:block;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:8px 12px;cursor:pointer;font-size:14px;text-align:center}
+.chip.sel{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.chip small{display:block;font-size:11px;opacity:.8}
+input,select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:8px}
+.cta{width:100%;border:0;background:var(--accent);color:var(--bg);padding:14px;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer}
+.cta:disabled{opacity:.4;cursor:not-allowed}
+.ghost{border:1.5px solid var(--line);background:none;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px}
+.muted{color:var(--muted);font-size:13px}
+.ok{text-align:center}.ok h2{font-size:30px;color:var(--ok)}
+.sum{background:var(--soft);border-radius:14px;padding:14px;margin:12px 0;text-align:left;line-height:1.8}
+.turno{display:flex;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:10px 0}
+.turno:first-of-type{border-top:0}
+.hr{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--accent);min-width:58px}
+.row{display:flex;gap:6px}
+.row>*{flex:1}
+.days{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.hide{display:none}
+/* ===== Estética acuarela ===== */
+:root{--b1:#f2cdb3;--b2:#f7e0cd;--shadow:0 10px 30px -14px rgba(154,74,40,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--b1:#5a3320;--b2:#3b2a21;--shadow:0 10px 30px -14px #000}}
+:root[data-theme="dark"]{--b1:#5a3320;--b2:#3b2a21;--shadow:0 10px 30px -14px #000}
+body{background:radial-gradient(circle at 0 0,var(--b1) 0,transparent 38%),radial-gradient(circle at 100% 22%,var(--b2) 0,transparent 34%),radial-gradient(circle at 0 78%,var(--b2) 0,transparent 36%),radial-gradient(circle at 100% 100%,var(--b1) 0,transparent 40%),var(--bg);background-attachment:fixed}
+header{padding:26px 0 4px}
+header svg{display:block;margin:0 auto 6px;color:var(--accent)}
+header h1{font-size:48px;font-weight:500;letter-spacing:.08em}
+header p{letter-spacing:.14em;font-size:11px;text-transform:lowercase}
+.sprig{display:block;margin:10px auto 0;color:var(--accent);opacity:.8}
+nav{background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--line);backdrop-filter:blur(8px)}
+.step{background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:26px;padding:20px 16px;box-shadow:var(--shadow)}
+.step h2{display:table;margin:0 auto 14px;padding:3px 26px 5px;font-size:25px;font-weight:600;text-align:center;background:linear-gradient(100deg,transparent 0,var(--b1) 9%,var(--b1) 91%,transparent 100%);border-radius:48% 52% 50% 50%/62% 40% 60% 38%}
+.grp{text-align:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;font-weight:600;color:var(--accent);margin:16px 0 8px}
+.grp:before,.grp:after{content:"";display:inline-block;width:28px;height:1px;background:var(--line);vertical-align:middle;margin:0 10px}
+.opt,.chip{border-radius:16px;transition:transform .15s,background .15s}
+.opt{background:color-mix(in srgb,var(--bg) 70%,transparent);border-width:1px}
+.opt:active,.chip:active{transform:scale(.97)}
+.opt.sel,.chip.sel{box-shadow:0 6px 16px -8px var(--accent)}
+.opt b{font-family:'Cormorant Garamond',serif;font-size:19px}
+.cta{background:linear-gradient(135deg,var(--accent),#c98260);border-radius:99px;box-shadow:0 10px 22px -10px var(--accent);letter-spacing:.03em}
+.sum{border-radius:20px;background:linear-gradient(135deg,var(--b2),var(--b1))}
+.hr{font-size:24px}
+input,select{border-radius:14px;border-width:1px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+<svg width="64" height="34" viewBox="0 0 64 34" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="M16 30a16 16 0 0 1 32 0M2 30h60M32 4v5M13 11l3 4M51 11l-3 4M5 21l5 1M59 21l-5 1"/></svg>
+<h1>Mis Linduras</h1><p>centro de belleza · estética facial &amp; corporal</p>
+<svg class="sprig" width="190" height="22" viewBox="0 0 190 22" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><path d="M8 11h72M110 11h72"/><path d="M95 4v14M95 11c-6-1-9-5-9-8 5 0 9 3 9 8zM95 11c6-1 9-5 9-8-5 0-9 3-9 8zM95 18c-6-1-9-4-9-7 5 0 9 3 9 7zM95 18c6-1 9-4 9-7-5 0-9 3-9 7z"/></svg>
+</header>
+<main id="app"></main>
+<script>window.MODE='admin';</script>
+<script>
+
+// ===== DATOS (precios de las promos de la carta) =====
+const WA = '5491131508390';
+const CATS = {dep:'Depilación · promos', zon:'Depilación · zonas individuales', mas:'Masajes'};
+const SERV = [
+ ['p1','Cavado completo + tira de cola + axilas','dep',16500,45],['p2','Espalda completa + axilas','dep',12900,45],
+ ['p3','Pierna entera + axilas o bozo','dep',12500,45],['p4','Pecho + abdomen + hombros + axilas','dep',22500,60],
+ ['p5','Rostro completo','dep',6900,30],['p6','Rostro completo + axilas','dep',11000,30],
+ ['z1','Rostro','zon',8000,30],['z2','Axilas','zon',6500,30],['z3','Brazos','zon',9000,30],['z4','Piernas','zon',8500,30],
+ ['z5','Cavado','zon',8000,30],['z6','Tira de cola','zon',7500,30],['z7','Espalda','zon',9000,30],
+ ['m1','Masaje relajante','mas',null,60],['m2','Masaje descontracturante','mas',null,60],['m3','Reflexología podal','mas',null,45],
+ ['m4','Drenaje linfático','mas',null,60],['m5','Bambuterapia','mas',null,60],['m6','Gemoterapia (piedras calientes)','mas',null,60]
+].map(([id,name,cat,price,dur])=>({id,name,cat,price,dur}));
+const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const money=n=>n==null?'Consultar':'$'+n.toLocaleString('es-AR');
+
+// ===== ESTADO (guardado en este navegador) =====
+// ===== SUPABASE (pegá acá tus datos: Project Settings → API) =====
+const SUPABASE_URL='https://TU-PROYECTO.supabase.co', SUPABASE_KEY='TU_ANON_KEY';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let S={workers:[],appts:[]},A=[],PIN='';
+async function loadPublic(){
+  const {data:p,error}=await db.from('profesionales').select('*').order('created_at');
+  if(error){alert('No se pudo conectar con la base de datos.');return}
+  S.workers=p.map(w=>({id:w.id,name:w.name,days:w.days,from:w.desde,to:w.hasta,cats:w.cats}));
+  const d0=ymd(new Date()),d1=ymd(new Date(Date.now()+15*864e5));
+  const {data:o}=await db.rpc('ocupados',{p_from:d0,p_to:d1});
+  S.appts=(o||[]).map(a=>({wid:a.wid,date:a.fecha,time:a.hora,dur:a.dur}));
+}
+async function loadAdmin(){
+  const {data}=await db.rpc('admin_turnos',{p_pin:PIN,p_fecha:adminDate});
+  A=(data||[]).map(a=>({id:a.id,wid:a.wid,sid:a.sid,date:a.fecha,time:a.hora,dur:a.dur,name:a.nombre,phone:a.telefono}));
+}
+let _t;const save=()=>{clearTimeout(_t);_t=setTimeout(async()=>{
+  const {error}=await db.rpc('admin_guardar_prof',{p_pin:PIN,p:S.workers.map(w=>({id:w.id,name:w.name,days:w.days,desde:w.from,hasta:w.to,cats:w.cats}))});
+  if(error)alert('No se pudo guardar: '+error.message)},400)};
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ===== LÓGICA DE HORARIOS =====
+const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
+const toStr=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromYmd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+function slots(w,date,dur){
+  const d=fromYmd(date);
+  if(!w.days.includes(d.getDay()))return [];
+  const busy=S.appts.filter(a=>a.wid===w.id&&a.date===date).map(a=>[toMin(a.time),toMin(a.time)+a.dur]);
+  const now=new Date(),isToday=ymd(now)===date,nowM=now.getHours()*60+now.getMinutes()+30;
+  const out=[];
+  for(let t=toMin(w.from);t+dur<=toMin(w.to);t+=30){
+    if(isToday&&t<nowM)continue;
+    if(busy.every(([a,b])=>t+dur<=a||t>=b))out.push(toStr(t));
+  }
+  return out;
+}
+const capable=(w,sv)=>w.cats.includes(sv.cat);
+
+// ===== CLIENTA =====
+let B={sid:null,wid:'any',date:null,time:null,wUsed:null,done:null};
+function renderC(){
+  const sv=SERV.find(s=>s.id===B.sid);
+  const ws=sv?S.workers.filter(w=>capable(w,sv)):[];
+  let h='';
+  if(B.done){
+    const a=B.done,s=SERV.find(x=>x.id===a.sid),w=S.workers.find(x=>x.id===a.wid);
+    const msg=`Hola Mis Linduras! Reservé turno: ${s.name}, ${fromYmd(a.date).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})} a las ${a.time} con ${w.name}. A nombre de ${a.name}.`;
+    $('#app').innerHTML=`<div class="step ok"><h2>¡Turno confirmado!</h2><div class="sum">${esc(s.name)}<br>${fromYmd(a.date).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})} · <b>${a.time} hs</b><br>Te atiende: <b>${esc(w.name)}</b><br>Duración aprox.: ${a.dur} min</div>
+    <a href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener"><button class="cta">Avisar por WhatsApp</button></a>
+    <p class="muted" style="margin:12px 0">Si necesitás cambiarlo, escribinos al 11 3150-8390.</p>
+    <button class="ghost" id="again">Sacar otro turno</button></div>`;
+    $('#again').onclick=()=>{B={sid:null,wid:'any',date:null,time:null,wUsed:null,done:null};renderC()};
+    return;
+  }
+  // 1 servicio
+  h+=`<section class="step"><h2>¿Qué servicio querés?</h2>`;
+  for(const c in CATS){h+=`<div class="grp">${CATS[c]}</div>`;
+    SERV.filter(s=>s.cat===c).forEach(s=>h+=`<button class="opt ${B.sid===s.id?'sel':''}" data-s="${s.id}"><span>${s.name}<small>${s.dur} min</small></span><b>${money(s.price)}</b></button>`)}
+  h+=`</section>`;
+  // 2 profesional
+  h+=`<section class="step ${sv?'':'off'}"><h2>¿Con quién?</h2><div class="chips">
+    <button class="chip ${B.wid==='any'?'sel':''}" data-w="any">Cualquiera<small>El primer horario libre</small></button>`;
+  ws.forEach(w=>h+=`<button class="chip ${B.wid===w.id?'sel':''}" data-w="${w.id}">${esc(w.name)}</button>`);
+  h+=`</div></section>`;
+  // 3 día y hora
+  h+=`<section class="step ${sv?'':'off'}"><h2>Día y horario</h2><div class="chips">`;
+  const today=new Date();let days=[];
+  for(let i=0;i<14;i++){const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);const k=ymd(d);
+    const n=sv?avail(sv,ws,k).length:0;
+    if(sv&&!n)continue;days.push([d,k])}
+  days.forEach(([d,k])=>h+=`<button class="chip ${B.date===k?'sel':''}" data-d="${k}">${DAYS[d.getDay()]}<small>${d.getDate()}/${d.getMonth()+1}</small></button>`);
+  if(sv&&!days.length)h+=`<p class="muted">No hay horarios libres en los próximos 14 días.</p>`;
+  h+=`</div>`;
+  if(sv&&B.date){const t=avail(sv,ws,B.date);h+=`<div class="grp">Horarios libres</div><div class="chips">`+
+    t.map(([time])=>`<button class="chip ${B.time===time?'sel':''}" data-t="${time}">${time}</button>`).join('')+`</div>`;
+    if(B.time){const wid=pick(sv,ws,B.date,B.time);const w=S.workers.find(x=>x.id===wid);h+=`<p class="muted" style="margin-top:10px">Te va a atender <b>${esc(w.name)}</b>.</p>`}}
+  h+=`</section>`;
+  // 4 datos
+  h+=`<section class="step ${B.time?'':'off'}"><h2>Tus datos</h2><input id="nm" placeholder="Nombre y apellido" autocomplete="name"><input id="ph" placeholder="WhatsApp (ej. 11 5555 1234)" inputmode="tel" autocomplete="tel">
+  <button class="cta" id="ok">Confirmar turno</button><p class="muted" id="err" style="color:var(--bad);margin-top:8px"></p></section>`;
+  const keep={n:$('#nm')?.value,p:$('#ph')?.value};
+  $('#app').innerHTML=h;
+  if(keep.n)$('#nm').value=keep.n;if(keep.p)$('#ph').value=keep.p;
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{B.sid=b.dataset.s;B.wid='any';B.date=null;B.time=null;renderC();window.scrollBy({top:200,behavior:'smooth'})});
+  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{B.wid=b.dataset.w;B.date=null;B.time=null;renderC()});
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{B.date=b.dataset.d;B.time=null;renderC()});
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{B.time=b.dataset.t;renderC()});
+  const ok=$('#ok');if(ok)ok.onclick=async()=>{
+    const name=$('#nm').value.trim(),phone=$('#ph').value.trim();
+    if(name.length<2||phone.replace(/\D/g,'').length<8){$('#err').textContent='Completá tu nombre y un WhatsApp válido.';return}
+    const wid=pick(sv,ws,B.date,B.time);
+    if(!wid||!slots(S.workers.find(w=>w.id===wid),B.date,sv.dur).includes(B.time)){B.time=null;renderC();return}
+    const a={wid,sid:sv.id,date:B.date,time:B.time,dur:sv.dur,name,phone};
+    ok.disabled=true;
+    const {error}=await db.rpc('crear_turno',{p_wid:wid,p_sid:sv.id,p_fecha:a.date,p_hora:a.time,p_dur:a.dur,p_nombre:name,p_tel:phone});
+    if(error){await loadPublic();B.time=null;renderC();$('#err').textContent='Ese horario se acaba de ocupar. Elegí otro.';return}
+    S.appts.push(a);B.done=a;renderC();window.scrollTo(0,0);
+  };
+}
+// horarios disponibles unificados (si es "cualquiera", une todas las profesionales)
+function avail(sv,ws,date){
+  const list=B.wid==='any'?ws:ws.filter(w=>w.id===B.wid);
+  const set=new Set();list.forEach(w=>slots(w,date,sv.dur).forEach(t=>set.add(t)));
+  return [...set].sort().map(t=>[t]);
+}
+// asigna automáticamente la profesional con menos turnos ese día
+function pick(sv,ws,date,time){
+  const list=(B.wid==='any'?ws:ws.filter(w=>w.id===B.wid)).filter(w=>slots(w,date,sv.dur).includes(time));
+  list.sort((a,b)=>S.appts.filter(x=>x.wid===a.id&&x.date===date).length-S.appts.filter(x=>x.wid===b.id&&x.date===date).length);
+  return list[0]?.id;
+}
+
+// ===== ADMIN =====
+let unlocked=false,adminDate=ymd(new Date()),adminTab='agenda';
+function renderA(){
+  if(!unlocked){
+    $('#app').innerHTML=`<div class="step"><h2>Acceso del equipo</h2><input id="pin" type="password" inputmode="numeric" placeholder="PIN"><button class="cta" id="go">Entrar</button><p class="muted" id="err" style="color:var(--bad);margin-top:8px"></p></div>`;
+    $('#go').onclick=async()=>{const p=$('#pin').value;const {data}=await db.rpc('chk_pin',{p_pin:p});if(data===true){PIN=p;unlocked=true;await loadAdmin();renderA()}else $('#err').textContent='PIN incorrecto.'};
+    return;
+  }
+  let h=`<div class="row" style="margin-bottom:12px"><button class="chip ${adminTab==='agenda'?'sel':''}" id="t1">Agenda</button><button class="chip ${adminTab==='equipo'?'sel':''}" id="t2">Equipo</button></div>`;
+  if(adminTab==='agenda'){
+    h+=`<div class="step"><input type="date" id="ad" value="${adminDate}"><h2>Turnos del día</h2>`;
+    S.workers.forEach(w=>{
+      const l=A.filter(a=>a.wid===w.id).sort((a,b)=>a.time.localeCompare(b.time));
+      h+=`<div class="grp">${esc(w.name)} · ${l.length} turno${l.length===1?'':'s'}</div>`;
+      if(!l.length)h+=`<p class="muted">Sin turnos.</p>`;
+      l.forEach(a=>{const s=SERV.find(x=>x.id===a.sid);h+=`<div class="turno"><span class="hr">${a.time}</span><span style="flex:1">${esc(a.name)}<small class="muted" style="display:block">${s.name} · ${a.dur} min</small></span>
+        <a href="https://wa.me/54${a.phone.replace(/\D/g,'').replace(/^0|^54|^9/,'')}" target="_blank" rel="noopener" class="ghost" style="text-decoration:none">WhatsApp</a><button class="ghost" data-x="${a.id}" aria-label="Cancelar turno">✕</button></div>`});
+    });
+    h+=`</div>`;
+  }else{
+    h+=`<div class="step"><h2>Profesionales</h2>`;
+    S.workers.forEach((w,i)=>{
+      h+=`<div class="turno" style="display:block"><input data-n="${i}" value="${esc(w.name)}" aria-label="Nombre">
+      <div class="days">${DAYS.map((d,n)=>`<button class="chip ${w.days.includes(n)?'sel':''}" data-dw="${i}:${n}">${d}</button>`).join('')}</div>
+      <div class="row"><input type="time" data-f="${i}" value="${w.from}"><input type="time" data-t="${i}" value="${w.to}"></div>
+      <div class="days">${Object.entries(CATS).map(([c,l])=>`<button class="chip ${w.cats.includes(c)?'sel':''}" data-cw="${i}:${c}">${l.replace('Depilación · ','')}</button>`).join('')}</div>
+      <button class="ghost" data-del="${i}">Quitar a ${esc(w.name)}</button></div>`});
+    h+=`<button class="cta" id="addw" style="margin-top:12px">Agregar profesional</button></div>
+    <div class="step"><h2>PIN de acceso</h2><input id="np" inputmode="numeric" placeholder="Nuevo PIN"><button class="ghost" id="svp">Cambiar PIN</button></div>`;
+  }
+  $('#app').innerHTML=h;
+  $('#t1').onclick=()=>{adminTab='agenda';renderA()};$('#t2').onclick=()=>{adminTab='equipo';renderA()};
+  const q=(s,f)=>document.querySelectorAll(s).forEach(f);
+  const ad=$('#ad');if(ad)ad.onchange=async()=>{adminDate=ad.value||adminDate;await loadAdmin();renderA()};
+  q('[data-x]',b=>b.onclick=async()=>{if(confirm('¿Cancelar este turno?')){await db.rpc('admin_cancelar',{p_pin:PIN,p_id:b.dataset.x});await loadAdmin();await loadPublic();renderA()}});
+  q('[data-n]',i=>i.onchange=()=>{S.workers[i.dataset.n].name=i.value.trim()||'Sin nombre';save()});
+  q('[data-f]',i=>i.onchange=()=>{S.workers[i.dataset.f].from=i.value;save()});
+  q('[data-t]',i=>i.onchange=()=>{if(i.dataset.t!==undefined){S.workers[i.dataset.t].to=i.value;save()}});
+  q('[data-dw]',b=>b.onclick=()=>{const[i,n]=b.dataset.dw.split(':').map(Number),d=S.workers[i].days;const x=d.indexOf(n);x<0?d.push(n):d.splice(x,1);save();renderA()});
+  q('[data-cw]',b=>b.onclick=()=>{const[i,c]=b.dataset.cw.split(':'),d=S.workers[i].cats;const x=d.indexOf(c);x<0?d.push(c):d.splice(x,1);save();renderA()});
+  q('[data-del]',b=>b.onclick=()=>{const w=S.workers[b.dataset.del];if(confirm('¿Quitar a '+w.name+'? Sus turnos futuros también se borran.')){S.appts=S.appts.filter(a=>a.wid!==w.id);S.workers.splice(b.dataset.del,1);save();renderA()}});
+  const aw=$('#addw');if(aw)aw.onclick=()=>{S.workers.push({id:'w'+Date.now(),name:'Nueva',days:[1,2,3,4,5],from:'10:00',to:'18:00',cats:['dep','zon']});save();renderA()};
+  const sp=$('#svp');if(sp)sp.onclick=()=>{const v=$('#np').value.trim();if(v.length>=4){db.rpc('admin_set_pin',{p_pin:PIN,p_new:v}).then(({error})=>{if(error)alert(error.message);else{PIN=v;alert('PIN actualizado')}})}else alert('Mínimo 4 dígitos')};
+}
+// ===== ARRANQUE (cada página define window.MODE = 'cliente' o 'admin') =====
+const go=t=>t==='c'?renderC():renderA();
+(async()=>{$('#app').innerHTML='<p class="muted" style="text-align:center">Cargando…</p>';await loadPublic();go(window.MODE==='admin'?'a':'c')})();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
