@@ -4,7 +4,7 @@ self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
 self.addEventListener('push',e=>{
   let d={};try{d=e.data.json()}catch(_){}
   e.waitUntil(self.registration.showNotification(d.title||'Mis Linduras',{
-    body:d.body||'Hay un turno nuevo',icon:'icons/icon-192.png',badge:'icons/icon-192.png',data:{url:d.url||'admin.html'}}));
+    body:d.body||'Hay un turno nuevo',icon:'icons/icon-192.png',badge:'icons/badge-96.png',data:{url:d.url||'admin.html'}}));
 });
 self.addEventListener('notificationclick',e=>{
   e.notification.close();
