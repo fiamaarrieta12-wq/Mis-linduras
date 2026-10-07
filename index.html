@@ -87,6 +87,21 @@ textarea{resize:vertical;font-family:inherit;line-height:1.4}
 .pin .rr button{border:0;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;border-radius:12px;padding:0 16px;font-weight:600;font-size:14px;cursor:pointer}
 .wa-fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:#1f9d55;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(0,0,0,.45);z-index:4}
 a{color:inherit}
+/* ---- vista compacta ---- */
+body{padding:0 14px 84px;font-size:15px}
+header{padding:10px 0 8px}header img{width:92px}header p{font-size:10px}
+.step,.card{padding:16px;margin-bottom:10px;border-radius:18px}
+h2{font-size:23px;margin-bottom:8px}
+#app.c .step h2::before{width:24px;height:24px;font-size:14px;margin-right:9px;vertical-align:3px}
+.grp{margin:12px 0 2px;font-size:10.5px}
+.opt{padding:8px;gap:10px}.opt small{font-size:11.5px;line-height:1.25}.opt b{font-size:20px}
+.opt a.q{font:500 italic 15px var(--serif);color:var(--gold);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 0 6px 8px}
+.chips{gap:6px}.chip{padding:7px 13px;font-size:14px}
+.chips.sc{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips.sc::-webkit-scrollbar{display:none}.chips.sc .chip{flex:none}
+.step.off{padding:11px 16px}.step.off h2{margin:0;font-size:19px}.step.off>:not(h2){display:none}
+.pin{padding:12px 14px;margin-bottom:10px;border-radius:18px}.pin p{font-size:18px;margin-bottom:8px}.pin .tag{margin-bottom:3px}
+input,select,textarea{padding:10px 12px;margin-bottom:8px}
+.cta{padding:13px}.sum{padding:12px;margin:10px 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -226,6 +241,7 @@ function pick(sv,ws,date,time){
 let B={sid:null,wid:'any',date:null,time:null,done:null};
 const waMsg=(a,s,w)=>`Hola Mis Linduras! Reservé turno: ${s.name}, ${longDate(a.date)} a las ${a.time} con ${w.name}. A nombre de ${a.name}.`+(a.reply?` Sobre tu mensaje fijado («${AV.texto.trim()}»): ${a.reply}`:'');
 const turnoTxt=()=>{const l=lsGet('ml_last',null);return l&&l.date>=ymd(new Date())?` Mi turno: ${l.s}, ${longDate(l.date)} a las ${l.time} con ${l.w}.`:''};
+const waPrecio=s=>'https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Quería consultar el precio de: '+s.name);
 function renderC(){
   $('#app').className='c';
   const sv=SERV.find(s=>s.id===B.sid&&s.on),ws=sv?S.workers.filter(w=>capable(w,sv)):[];
@@ -239,11 +255,12 @@ function renderC(){
     $('#again').onclick=()=>{B={sid:null,wid:'any',date:null,time:null,done:null};renderC()};return;
   }
   let h=(AV.activo&&AV.texto.trim()?`<div class="pin"><div class="tag">📌 Mensaje fijado</div><p>${esc(AV.texto)}</p><div class="rr"><input id="rp" placeholder="Escribí tu respuesta…" aria-label="Tu respuesta"><button id="rpb">Responder</button></div></div>`:'')+`<section class="step"><h2>¿Qué servicio querés?</h2>`;
-  for(const c in CATS){const l=SERV.filter(s=>s.cat===c&&s.on);if(!l.length)continue;
-    h+=`<div class="grp">${CATS[c]}</div>`+l.map(s=>`<button class="opt ${B.sid===s.id?'sel':''}" data-s="${s.id}"><span>${esc(s.name)}<small>${s.dur} min</small></span><b class="${s.price==null?'q':''}">${money(s.price)}</b></button>`).join('')}
+  if(sv&&!B.chg)h+=`<div class="opt sel"><span>${esc(sv.name)}<small>${sv.dur} min</small></span><span style="display:flex;gap:10px;align-items:center"><b>${money(sv.price)}</b><button class="ghost" id="chg">Cambiar</button></span></div>`;
+  else for(const c in CATS){const l=SERV.filter(s=>s.cat===c&&s.on);if(!l.length)continue;
+    h+=`<div class="grp">${CATS[c]}</div>`+l.map(s=>`<div class="opt ${B.sid===s.id?'sel':''}" role="button" tabindex="0" data-s="${s.id}"><span>${esc(s.name)}<small>${s.dur} min</small></span>${s.price==null?`<a class="q" href="${waPrecio(s)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Consultar precio</a>`:`<b>${money(s.price)}</b>`}</div>`).join('')}
   h+=`</section><section class="step ${sv?'':'off'}"><h2>¿Con quién?</h2><div class="chips"><button class="chip ${B.wid==='any'?'sel':''}" data-w="any">Cualquiera<small>El primer horario libre</small></button>`;
   ws.forEach(w=>h+=`<button class="chip ${B.wid===w.id?'sel':''}" data-w="${w.id}">${esc(w.name)}</button>`);
-  h+=`</div></section><section class="step ${sv?'':'off'}"><h2>Día y horario</h2><div class="chips">`;
+  h+=`</div></section><section class="step ${sv?'':'off'}"><h2>Día y horario</h2><div class="chips sc">`;
   const t0=new Date(),days=[];
   for(let i=0;i<14;i++){const d=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+i),k=ymd(d);
     if(sv&&!avail(sv,ws,k).length)continue;days.push([d,k])}
@@ -258,7 +275,9 @@ function renderC(){
   $('#app').innerHTML=h;
   if(keep.n)$('#nm').value=keep.n;if(keep.p)$('#ph').value=keep.p;if(keep.r&&$('#rp'))$('#rp').value=keep.r;
   const rb=$('#rpb');if(rb)rb.onclick=()=>{const r=$('#rp').value.trim();if(!r){$('#rp').focus();return}window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola Mis Linduras! Te respondo a tu mensaje fijado («'+AV.texto.trim()+'»): '+r+turnoTxt()),'_blank','noopener')};
-  q('[data-s]',b=>b.onclick=()=>{B.sid=b.dataset.s;B.wid='any';B.date=null;B.time=null;renderC();window.scrollBy({top:200,behavior:'smooth'})});
+  q('[data-s]',b=>{b.onclick=()=>{B.sid=b.dataset.s;B.chg=false;B.wid='any';B.date=null;B.time=null;renderC();window.scrollTo({top:0,behavior:'smooth'})};
+    b.onkeydown=e=>{if(e.target===b&&(e.key==='Enter'||e.key===' ')){e.preventDefault();b.click()}}});
+  const cg=$('#chg');if(cg)cg.onclick=()=>{B.chg=true;renderC()};
   q('[data-w]',b=>b.onclick=()=>{B.wid=b.dataset.w;B.date=null;B.time=null;renderC()});
   q('[data-d]',b=>b.onclick=()=>{B.date=b.dataset.d;B.time=null;renderC()});
   q('[data-t]',b=>b.onclick=()=>{B.time=b.dataset.t;renderC()});
